@@ -8,18 +8,18 @@
 Cython==0.29.30
 # Cythonをコード秘匿に使う
 Cythonについての記事を観察していると公式例の高速化手法を紹介していることが多い印象です。
-Python高速化の需要は多いですが、費用対効果は高くないと思います。
-ではなぜここでCythonを取り上げるかというと以下の2点が理由です。
-- ソースコードの秘匿機能
-- 手軽さ
+Python高速化の需要は多いですが、この記事では**秘匿化とそれに伴う低速化**について取り上げます。
+結論はCythonサイコー、なのですが、理由は**秘匿の手軽さ**に尽きます。
+以下にその論拠や手法を記します。
 
-このドキュメントでは[FACE01](https://github.com/yKesamaru/FACE01_SAMPLE)を例にします。
-FACE01はPythonから利用する多機能な顔認識ライブラリです。
+> このドキュメントでは[FACE01](https://github.com/yKesamaru/FACE01_SAMPLE)を例にします。
+> FACE01はPythonから利用する多機能な顔認識ライブラリです。
 
 ## ソースコードの秘匿手法
 Pythonにおけるソースコード秘匿手法について調べると、クラウドでやれ、とかPyArmorを使えと出てきます。
-クラウドを利用する方法はここでは触れないとして、PyArmorに関してはコードサイズが大きくなるとライセンス料が必要なのと将来の拡張性が乏しいため選択肢から外します。
-CythonはそのままのPythonファイルをバイナリ化出来ます。たとえば下記は実際のsoファイルを逆アセンブルした様子です。
+クラウドを利用する方法はここでは触れないとして、PyArmorも選択肢から外します。
+
+CythonはそのままのPythonファイルをバイナリ化出来ます。下記は実際のsoファイルを逆アセンブルした様子です。
 ```bash:逆アセンブル例
 objdump -S logger.cpython-38-x86_64-linux-gnu.so 
 
@@ -49,6 +49,7 @@ logger.cpython-38-x86_64-linux-gnu.so:     ファイル形式 elf64-x86-64
 ## コード変更頻度
 元のPythonファイルに変更が生じるたびに、別に存在する高速化コードも変更しなくてはいけないと非常に面倒くさいです。
 Pythonとして実行できるファイルが少ない手間でバイナリ化出来ると効率的ですね。
+ですのでCythonを使うと言っても後から編集しなくてはいけないファイルは使用しません。
 
 ## 高速化手法との違い
 Pythonで書かれたコードを高速化する場合、どこがボトルネックになっているかプロファイルしてから要所のみを変更します。
@@ -58,7 +59,7 @@ Pythonで書かれたコードを高速化する場合、どこがボトルネ�
 この記事ではどの程度低速化してしまうかもプロファイルします。
 
 ### プロファイル手法
-色々あると思いますがここではcProfileとそれをブラウザで可視化するsnakeviz、細かい箇所は`time.perf_counter()`を用います。
+ここではcProfileとそれをブラウザで可視化するsnakeviz、細かい箇所は`time.perf_counter()`を用います。
 また変換後のプロファイルを得るために
 ```python
 #cython: profile=True
@@ -198,21 +199,7 @@ snakeviz restats
 
 ## Pythonコード
 ```python
-# cython: language_level=3
-# cython: profile = True
-""" これらは使用しません
-# cython: boundscheck = False
-# cython: wraparound = False
-# cython: initializedcheck = False
-# cython: cdivision = True
-# cython: always_allow_keywords = False
-# cython: unraisable_tracebacks = False
-# cython: binding = False
-"""
-
-"""cythonでは使用不可
 from __future__ import annotations
-"""
 import numpy as np
 
 class Return_face_image():
@@ -256,6 +243,19 @@ class Return_face_image():
 
 #cython: language_level=3
 #cython: profile=True
+""" これらは使用しません
+# cython: boundscheck = False
+# cython: wraparound = False
+# cython: initializedcheck = False
+# cython: cdivision = True
+# cython: always_allow_keywords = False
+# cython: unraisable_tracebacks = False
+# cython: binding = False
+"""
+
+"""cythonでは使用不可
+from __future__ import annotations
+"""
 @cython.returns(np.ndarray) 
 def return_face_image(
     ...
@@ -277,8 +277,7 @@ from setuptools import setup
 from Cython.Build import cythonize
 import glob
 
-
-py_file_list = glob.glob('/home/terms/bin/FACE01/face01lib/pyx/*pyx')
+py_file_list = glob.glob('~/bin/FACE01/face01lib/pyx/*pyx')
 for pyfile in py_file_list:
     setup(
         ext_modules = cythonize(
