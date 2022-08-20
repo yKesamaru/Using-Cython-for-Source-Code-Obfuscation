@@ -53,13 +53,13 @@ Pythonとして実行できるファイルが少ない手間でバイナリ化�
 
 ## 高速化手法との違い
 Pythonで書かれたコードを高速化する場合、どこがボトルネックになっているかプロファイルしてから要所のみを変更します。
-ここで扱う秘匿かとは高速化とは異なります。
-手軽な秘匿化はかえって低速化をまねきます。
+ここで扱う秘匿化と高速化は異なります。
+手軽な秘匿化は低速化をもたらします。
 
-この記事ではどの程度低速化してしまうかもプロファイルします。
+この記事ではどの程度低速化してしまうかプロファイルします。
 
 ### プロファイル手法
-ここではcProfileとそれをブラウザで可視化するsnakeviz、細かい箇所は`time.perf_counter()`を用います。
+cProfileとそれをブラウザで可視化するsnakeviz、細かい箇所は`time.perf_counter()`を用います。
 また変換後のプロファイルを得るために
 ```python
 #cython: profile=True
@@ -86,7 +86,7 @@ import FACE01 as fg
 
 """DEBUG
 Set the number of playback frames"""
-exec_times: int = 50
+exec_times: int = 30
 ALL_FRAME = exec_times
 
 # PySimpleGUI layout
@@ -171,7 +171,7 @@ def common_main(exec_times):
 pr.run('common_main(exec_times)', 'restats')
 ```
 
-上記サンプルプログラムは50frame処理すると終了します。
+上記サンプルプログラムは30frame処理すると終了します。
 終了した時点で
 ```bash
 snakeviz restats 
@@ -182,7 +182,7 @@ snakeviz restats
 ![下部](img/PASTE_IMAGE_2022-07-31-12-11-51.png)
 
 
-# `Cython`の`Pure Python Mode`を利用する
+# `Pure Python Mode`を利用
 公式ドキュメントは[こちら](https://cython.readthedocs.io/en/stable/src/tutorial/pure.html)です。
 
 公式ドキュメントに書いてあるとおりいくつかのやり方が存在しますが、目的が面倒くささの排除ですので、`pxd`ファイルを作る方向はなしにします。
@@ -256,7 +256,6 @@ class Return_face_image():
 """cythonでは使用不可
 from __future__ import annotations
 """
-@cython.returns(np.ndarray) 
 def return_face_image(
     ...
 
@@ -287,6 +286,7 @@ for pyfile in py_file_list:
 ```
 
 ## C++コード (Pybind11使用)
+仮に全く別のコードを書いてみたらどうでしょう。C++で書いてみます。
 ```Cpp
 #include <iostream>
 #include <pybind11/pybind11.h>
@@ -350,4 +350,54 @@ setup(
 ```
 
 # 速度計測結果
+## 出力
+```bash
+Audrey Hepburn 
+         Anti spoof              real 
+         Anti spoof score        99.0 %
+         similarity              99.2% 
+         coordinate              (127, 403, 324, 206) 
+         time                    2022,08,20,23,05,42,579428 
+         output                   
+ -------
+
+Audrey Hepburn 
+         Anti spoof              real 
+         Anti spoof score        99.0 %
+         similarity              99.2% 
+         coordinate              (127, 403, 324, 206) 
+         time                    2022,08,20,23,05,42,592691 
+         output                  output/Audrey Hepburn_2022,08,20,23,05,42,597155_0.36.png 
+ -------
+```
+![](img/PASTE_IMAGE_2022-08-20-23-07-18.png)
+
 ## Python
+```bash
+Predetermined number of frames: 50
+Number of frames processed: 50
+Total processing time: 11.895[seconds]
+Per frame: 0.238[seconds]
+```
+![](img/PASTE_IMAGE_2022-08-20-23-09-11.png)
+
+## Cython
+```bash
+Predetermined number of frames: 50
+Number of frames processed: 50
+Total processing time: 11.678[seconds]
+Per frame: 0.234[seconds]
+```
+![](img/PASTE_IMAGE_2022-08-20-23-17-59.png)
+
+## Cpp
+```bash
+Predetermined number of frames: 50
+Number of frames processed: 50
+Total processing time: 11.879[seconds]
+Per frame: 0.238[seconds]
+```
+![](img/PASTE_IMAGE_2022-08-20-23-19-35.png)
+
+## 処理速度
+![](img/PASTE_IMAGE_2022-08-20-23-25-53.png)
