@@ -1,7 +1,8 @@
-<!--  
-- 最終更新日
-- 
-  -->
+TODO #1:
+- 校正
+- GIFファイル化
+
+
 # 一時的なコード秘匿にCythonを！
 ![](https://github.com/yKesamaru/FACE01_SAMPLE/raw/master/docs/img/ROMAN_HOLIDAY.GIF?raw=true)
 # 環境
@@ -205,11 +206,11 @@ snakeviz restats
 frame: 画像データ (np.ndarray, ndim=3)
 face_location: 顔座標 (tuple<int,int,int,int>)
 ```python
-    def r_face_image(self, frame, face_location):
-        self.frame = frame
-        self.face_location = face_location
-        face_image = Return_face_image().return_face_image(self.frame, self.face_location)
-        return face_image
+def r_face_image(self, frame, face_location):
+    self.frame = frame
+    self.face_location = face_location
+    face_image = Return_face_image().return_face_image(self.frame, self.face_location)
+    return face_image
 ```
 
 ## Pythonコード
