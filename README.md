@@ -5,7 +5,16 @@
 # 一時的なコード秘匿にCythonを！
 ![](https://github.com/yKesamaru/FACE01_SAMPLE/raw/master/docs/img/ROMAN_HOLIDAY.GIF?raw=true)
 # 環境
+```bash
 Cython==0.29.30
+Python 3.8.10
+(FACE01) 
+$ inxi -SCGxx --filter
+System:    Kernel: 5.15.0-46-generic x86_64 bits: 64 compiler: N/A Desktop: Unity wm: gnome-shell dm: GDM3 
+           Distro: Ubuntu 20.04.4 LTS (Focal Fossa) 
+CPU:       Topology: Quad Core model: AMD Ryzen 5 1400 bits: 64 type: MT MCP arch: Zen rev: 1 L2 cache: 2048 KiB 
+Graphics:  Device-1: NVIDIA TU116 [GeForce GTX 1660 Ti] vendor: Micro-Star MSI driver: nvidia v: 515.65.01 bus ID: 08:00.0 
+```
 # Cythonをコード秘匿に使う
 Cythonについての記事を観察していると公式例の高速化手法を紹介していることが多い印象です。
 Python高速化の需要は多いですが、この記事では**秘匿化とそれに伴う低速化**について取り上げます。
@@ -19,7 +28,12 @@ Python高速化の需要は多いですが、この記事では**秘匿化とそ
 Pythonにおけるソースコード秘匿手法について調べると、クラウドでやれ、とかPyArmorを使えと出てきます。
 クラウドを利用する方法はここでは触れないとして、PyArmorも選択肢から外します。
 
-CythonはそのままのPythonファイルをバイナリ化出来ます。下記は実際のsoファイルを逆アセンブルした様子です。
+Cythonは生Pythonをバイナリ化出来ます。Python互換性のないコードを書く必要がありません。Cython >=0.27からPure Python Modeが使えます。
+元のPythonファイルに変更が生じるたびに、別に存在する高速化コードも変更しなくてはいけないと非常に面倒くさいです。
+
+
+### 例
+下記は実際にコンパイルされたsoファイルを逆アセンブルした様子です。これで十分です。
 ```bash:逆アセンブル例
 objdump -S logger.cpython-38-x86_64-linux-gnu.so 
 
@@ -46,17 +60,11 @@ logger.cpython-38-x86_64-linux-gnu.so:     ファイル形式 elf64-x86-64
 ```
 
 
-## コード変更頻度
-元のPythonファイルに変更が生じるたびに、別に存在する高速化コードも変更しなくてはいけないと非常に面倒くさいです。
-Pythonとして実行できるファイルが少ない手間でバイナリ化出来ると効率的ですね。
-ですのでCythonを使うと言っても後から編集しなくてはいけないファイルは使用しません。
-
 ## 高速化手法との違い
 Pythonで書かれたコードを高速化する場合、どこがボトルネックになっているかプロファイルしてから要所のみを変更します。
 ここで扱う秘匿化と高速化は異なります。
 手軽な秘匿化は低速化をもたらします。
 
-この記事ではどの程度低速化してしまうかプロファイルします。
 
 ### プロファイル手法
 cProfileとそれをブラウザで可視化するsnakeviz、細かい箇所は`time.perf_counter()`を用います。
@@ -66,7 +74,7 @@ cProfileとそれをブラウザで可視化するsnakeviz、細かい箇所は`
 ```
 を先頭行付近に配置します。詳細は[こちら](https://cython.readthedocs.io/en/stable/src/tutorial/profiling_tutorial.html#enabling-profiling-for-a-complete-source-file)を参照してください。
 
-これらのスニペットを挟むことにより尚更低速化が起こります。わかりやすさのために挿入しているということです。
+これらのスニペットを挟むことにより尚更低速化が起こります。エグザンプルとしてわかりやすさのために挿入します。
 
 ## テストコード
 ディレクトリ構成や出来ることは[こちら](https://github.com/yKesamaru/FACE01_SAMPLE)を参照してください。
@@ -86,7 +94,7 @@ import FACE01 as fg
 
 """DEBUG
 Set the number of playback frames"""
-exec_times: int = 30
+exec_times: int = 50
 ALL_FRAME = exec_times
 
 # PySimpleGUI layout
@@ -171,7 +179,8 @@ def common_main(exec_times):
 pr.run('common_main(exec_times)', 'restats')
 ```
 
-上記サンプルプログラムは30frame処理すると終了します。
+上記サンプルプログラムは50frame処理すると終了します。
+呼び出される方(return_face_image())は260回コールされます。
 終了した時点で
 ```bash
 snakeviz restats 
@@ -185,10 +194,16 @@ snakeviz restats
 # `Pure Python Mode`を利用
 公式ドキュメントは[こちら](https://cython.readthedocs.io/en/stable/src/tutorial/pure.html)です。
 
-公式ドキュメントに書いてあるとおりいくつかのやり方が存在しますが、目的が面倒くささの排除ですので、`pxd`ファイルを作る方向はなしにします。
+公式ドキュメントに書いてあるとおりいくつかのやり方が存在しますが、上記の理由から`pxd`ファイルを作る方向はなしにします。
 `magic cython module`を使いましょう。
 
+公式ドキュメントからそのまま引っ張ってきたものや単純な計算だけのエグザンプルコードは役に立つとは思えないので、少なくともオブジェクトをやり取りするようなものを実際のプロジェクトから引っこ抜いて来ました。
+共有ライブラリとしてコンパイルします。
+
 ## 呼び出し側コード
+変数
+frame: 画像データ (np.ndarray, ndim=3)
+face_location: 顔座標 (tuple<int,int,int,int>)
 ```python
     def r_face_image(self, frame, face_location):
         self.frame = frame
@@ -287,12 +302,12 @@ for pyfile in py_file_list:
 
 ## C++コード (Pybind11使用)
 仮に全く別のコードを書いてみたらどうでしょう。C++で書いてみます。
-```Cpp
+```C++
 #include <iostream>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 /*
-https://pybind11.readthedocs.io/en/stable/advanced/pycpp/numpy.html?highlight=numpy#numpy
+https://pybind11.readthedocs.io/en/stable/advanced/pyC++/numpy.html?highlight=numpy#numpy
 https://stackoverflow.com/questions/61821844/how-to-express-thisa03-03-in-python-as-cpybind11
 */
 namespace py = pybind11;
@@ -369,6 +384,7 @@ Audrey Hepburn
          time                    2022,08,20,23,05,42,592691 
          output                  output/Audrey Hepburn_2022,08,20,23,05,42,597155_0.36.png 
  -------
+# 以降省略
 ```
 ![](img/PASTE_IMAGE_2022-08-20-23-07-18.png)
 
@@ -390,7 +406,7 @@ Per frame: 0.234[seconds]
 ```
 ![](img/PASTE_IMAGE_2022-08-20-23-17-59.png)
 
-## Cpp
+## C++
 ```bash
 Predetermined number of frames: 50
 Number of frames processed: 50
@@ -401,3 +417,21 @@ Per frame: 0.238[seconds]
 
 ## 処理速度
 ![](img/PASTE_IMAGE_2022-08-20-23-25-53.png)
+生のPythonコードの処理にかかった時間を1として、CythonとC++で書かれたコードの処理時間を計算しました。
+C++が4倍近くかかっているのは巨大なndarrayを値渡ししているからです。ポインターを受け取ってスライスするにはもう少し複雑なコードを書かねばいけません。
+Cythonの処理時間が0.9なのは誤差です。実際もっと複雑な処理が書かれたPythonコードをコンパイルすると3倍かかることがあります。これは内部で非効率なオブジェクト処理がなされるからです。
+
+# まとめ
+今回はPythonコードの秘匿化手法を紹介しました。
+Pure Python Modeを使用する限り、Cython化は非常に有効な手段です。
+- デメリット
+  - Pure Python Modeがまだまだ発展途上
+  - 処理速度が低下する
+- メリット
+  - Pythonコードと互換性のないコードを書く必要がない
+
+# リファレンス
+- [FACE01](https://github.com/yKesamaru/FACE01_SAMPLE)
+  - Multi-functional face recognition library 
+- [Cython](https://cython.readthedocs.io/en/stable/index.html)
+
