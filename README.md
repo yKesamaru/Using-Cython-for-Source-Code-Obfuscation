@@ -442,3 +442,4 @@ Pure Python Modeを使用する限り、Cython化は非常に有効な手段で�
   - [Magic Attributes](https://cython.readthedocs.io/en/stable/src/tutorial/pure.html#magic-attributes)
 - [pybind11 numpy](https://pybind11.readthedocs.io/en/stable/advanced/pyC++/numpy.html?highlight=numpy#numpy)
 - [pybind11 slice](https://stackoverflow.com/questions/61821844/how-to-express-thisa03-03-in-python-as-cpybind11)
+- [Pythonコードの一時的な秘匿にはCythonを使おう](https://github.com/yKesamaru/Using-Cython-for-Source-Code-Anonymization)
