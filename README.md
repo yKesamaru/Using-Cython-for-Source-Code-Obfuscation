@@ -2,7 +2,7 @@
 - 校正
 - GIFファイル化 -->
 # Pythonコードの一時的な秘匿にはCythonを使おう
-![](https://github.com/yKesamaru/FACE01_SAMPLE/raw/master/docs/https://raw.githubusercontent.com/yKesamaru/Using-Cython-for-Source-Code-Anonymization/master/img/ROMAN_HOLIDAY.GIF?raw=true)
+![](https://github.com/yKesamaru/FACE01_SAMPLE/raw/master/docs/img/ROMAN_HOLIDAY.GIF?raw=true)
 # 環境
 ```bash
 Cython==0.29.30
