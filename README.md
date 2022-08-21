@@ -17,19 +17,25 @@ CPU:       Topology: Quad Core model: AMD Ryzen 5 1400 bits: 64 type: MT MCP arc
 Graphics:  Device-1: NVIDIA TU116 [GeForce GTX 1660 Ti] vendor: Micro-Star MSI driver: nvidia v: 515.65.01 bus ID: 08:00.0 
 ```
 # Cythonをコード秘匿に使う
-Cythonについての記事を観察していると公式例の高速化手法を紹介していることが多い印象です。
-Python高速化の需要は多いですが、この記事では**秘匿化とそれに伴う低速化**について取り上げます。
-結論はCythonサイコー、なのですが、理由は**秘匿の手軽さ**に尽きます。
-以下にその論拠や手法を記します。
+Cythonについての記事を観察していると公式例の高速化手法を紹介していることが多い印象です。(cdefで書き換えたファイルを別途用意したり等)
+Python高速化の需要は多く手軽な手法としてCythonが紹介されますが、この記事では**秘匿化とそれに伴う低速化**について取り上げます。手軽な秘匿化は低速化をもたらします。
+結論はCythonサイコーなのですが、理由は**秘匿の手軽さ**に尽きます。
+公式ドキュメントに書いてあるとおりいくつかのやり方が存在しますが`magic cython module`手法を紹介します。
+
+公式ドキュメントからそのまま引っ張ってきたものや単純な計算だけのエグザンプルコードは役に立つとは思えないので、少なくともオブジェクトをやり取りするようなものを実際のプロジェクトから引っこ抜いて来ました。
+共有ライブラリとしてコンパイルします。
 
 > このドキュメントでは[FACE01](https://github.com/yKesamaru/FACE01_SAMPLE)を例にします。
 > FACE01はPythonから利用する多機能な顔認識ライブラリです。
 
 ## ソースコードの秘匿手法
-Pythonにおけるソースコード秘匿手法について調べると、クラウドでやれ、とかPyArmorを使えと出てきます。
-クラウドを利用する方法はここでは触れないとして、PyArmorも選択肢から外します。
+Pythonにおけるソースコード秘匿手法について調べると、クラウドでやれとかPyArmorを使えと出てきます。
+これでは問題の解決にはなりません。
 
 Cythonは生Pythonをバイナリ化出来ます。Python互換性のないコードを書く必要がありません。Cython >=0.27からPure Python Modeが使えます。
+```python
+import cython
+```
 元のPythonファイルに変更が生じるたびに、別に存在する高速化コードも変更しなくてはいけないと非常に面倒くさいです。
 
 
@@ -59,13 +65,6 @@ logger.cpython-38-x86_64-linux-gnu.so:     ファイル形式 elf64-x86-64
     3020:	ff 35 e2 9f 00 00    	pushq  0x9fe2(%rip)        # d008 
 # 以降省略
 ```
-
-
-## 高速化手法との違い
-Pythonで書かれたコードを高速化する場合、どこがボトルネックになっているかプロファイルしてから要所のみを変更します。
-ここで扱う秘匿化と高速化は異なります。
-手軽な秘匿化は低速化をもたらします。
-
 
 ### プロファイル手法
 cProfileとそれをブラウザで可視化するsnakeviz、細かい箇所は`time.perf_counter()`を用います。
@@ -195,11 +194,6 @@ snakeviz restats
 # `Pure Python Mode`を利用
 公式ドキュメントは[こちら](https://cython.readthedocs.io/en/stable/src/tutorial/pure.html)です。
 
-公式ドキュメントに書いてあるとおりいくつかのやり方が存在しますが、上記の理由から`pxd`ファイルを作る方向はなしにします。
-`magic cython module`を使いましょう。
-
-公式ドキュメントからそのまま引っ張ってきたものや単純な計算だけのエグザンプルコードは役に立つとは思えないので、少なくともオブジェクトをやり取りするようなものを実際のプロジェクトから引っこ抜いて来ました。
-共有ライブラリとしてコンパイルします。
 
 ## 呼び出し側コード
 変数
@@ -302,7 +296,7 @@ for pyfile in py_file_list:
 ```
 
 ## C++コード (Pybind11使用)
-仮に全く別のコードを書いてみたらどうでしょう。C++で書いてみます。
+仮に全く別のコードを書いてみたらどうでしょう。C++を用います。
 ```C++
 #include <iostream>
 #include <pybind11/pybind11.h>
@@ -387,7 +381,7 @@ Audrey Hepburn
  -------
 # 以降省略
 ```
-![](img/PASTE_IMAGE_2022-08-20-23-07-18.png)
+![](img/FACE01_WINDOW.GIF)
 
 ## Python
 ```bash
@@ -435,4 +429,6 @@ Pure Python Modeを使用する限り、Cython化は非常に有効な手段で�
 - [FACE01](https://github.com/yKesamaru/FACE01_SAMPLE)
   - Multi-functional face recognition library 
 - [Cython](https://cython.readthedocs.io/en/stable/index.html)
+  - [Magic Attributes](https://cython.readthedocs.io/en/stable/src/tutorial/pure.html#magic-attributes)
+  - 
 
