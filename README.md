@@ -16,7 +16,9 @@ Graphics:  Device-1: NVIDIA TU116 [GeForce GTX 1660 Ti] vendor: Micro-Star MSI d
 ```
 # Cythonをコード秘匿に使う
 Cythonについての記事を観察していると公式例の高速化手法を紹介していることが多い印象です。(cdefで書き換えたファイルを別途用意したり等)
+
 Python高速化の需要は多く手軽な手法としてCythonが紹介されますが、この記事では**秘匿化とそれに伴う低速化**について取り上げます。手軽な秘匿化は低速化をもたらします。
+
 結論はCythonサイコーなのですが、理由は**秘匿の手軽さ**に尽きます。
 公式ドキュメントに書いてあるとおりいくつかのやり方が存在しますが`magic cython module`手法を紹介します。
 
@@ -66,6 +68,7 @@ logger.cpython-38-x86_64-linux-gnu.so:     ファイル形式 elf64-x86-64
 
 ### プロファイル手法
 cProfileとそれをブラウザで可視化するsnakeviz、細かい箇所は`time.perf_counter()`を用います。
+
 また変換後のプロファイルを得るために
 ```python
 #cython: profile=True
@@ -245,6 +248,7 @@ class Return_face_image():
         else:
             return empty_ndarray
 ```
+
 ## Pythonコード + Pure Python Mode (Cython)
 ```python
 # 追加・変更可能部分
@@ -379,6 +383,7 @@ Audrey Hepburn
  -------
 # 以降省略
 ```
+
 ![](img/FACE01_WINDOW.GIF)
 
 ## Python
@@ -410,13 +415,18 @@ Per frame: 0.238[seconds]
 
 ## 処理速度
 ![](img/PASTE_IMAGE_2022-08-20-23-25-53.png)
+
 生のPythonコードの処理にかかった時間を1として、CythonとC++で書かれたコードの処理時間を計算しました。
+
 C++が4倍近くかかっているのは巨大なndarrayを値渡ししているからです。ポインターを受け取ってスライスするにはもう少し複雑なコードを書かねばいけません。
+
 Cythonの処理時間が0.9なのは誤差です。実際もっと複雑な処理が書かれたPythonコードをコンパイルすると3倍かかることがあります。これは内部で非効率なオブジェクト処理がなされるからです。
 
 # まとめ
 今回はPythonコードの秘匿化手法を紹介しました。
+
 Pure Python Modeを使用する限り、Cython化は非常に有効な手段です。
+
 - デメリット
   - Pure Python Modeがまだまだ発展途上
   - 処理速度が低下する
@@ -428,5 +438,6 @@ Pure Python Modeを使用する限り、Cython化は非常に有効な手段で�
   - Multi-functional face recognition library 
 - [Cython](https://cython.readthedocs.io/en/stable/index.html)
   - [Magic Attributes](https://cython.readthedocs.io/en/stable/src/tutorial/pure.html#magic-attributes)
-  - 
+
+
 
