@@ -2,7 +2,7 @@
 - 校正
 - GIFファイル化 -->
 # Pythonコードの一時的な秘匿にはCythonを使おう
-![](https://github.com/yKesamaru/FACE01_SAMPLE/raw/master/docs/img/ROMAN_HOLIDAY.GIF?raw=true)
+![](https://github.com/yKesamaru/FACE01_SAMPLE/raw/master/docs/https://raw.githubusercontent.com/yKesamaru/Using-Cython-for-Source-Code-Anonymization/master/img/ROMAN_HOLIDAY.GIF?raw=true)
 # 環境
 ```bash
 Cython==0.29.30
@@ -189,8 +189,8 @@ snakeviz restats
 ```
 を実行するとサーバが立ち上がって下記がブラウザに表示されます。バーをクリックすることで絞り込み可能で、テーブルの並び替えも出来る高性能なモジュールです。
 
-![上部](img/PASTE_IMAGE_2022-07-31-17-26-32.png)
-![下部](img/PASTE_IMAGE_2022-07-31-12-11-51.png)
+![上部](https://raw.githubusercontent.com/yKesamaru/Using-Cython-for-Source-Code-Anonymization/master/img/PASTE_IMAGE_2022-07-31-17-26-32.png)
+![下部](https://raw.githubusercontent.com/yKesamaru/Using-Cython-for-Source-Code-Anonymization/master/img/PASTE_IMAGE_2022-07-31-12-11-51.png)
 
 
 # `Pure Python Mode`を利用
@@ -386,7 +386,7 @@ Audrey Hepburn
 # 以降省略
 ```
 
-![](img/FACE01_WINDOW.GIF)
+![](https://raw.githubusercontent.com/yKesamaru/Using-Cython-for-Source-Code-Anonymization/master/img/FACE01_WINDOW.GIF)
 
 ## Python
 ```bash
@@ -395,7 +395,7 @@ Number of frames processed: 50
 Total processing time: 11.895[seconds]
 Per frame: 0.238[seconds]
 ```
-![](img/PASTE_IMAGE_2022-08-20-23-09-11.png)
+![](https://raw.githubusercontent.com/yKesamaru/Using-Cython-for-Source-Code-Anonymization/master/img/PASTE_IMAGE_2022-08-20-23-09-11.png)
 
 ## Cython
 ```bash
@@ -404,7 +404,7 @@ Number of frames processed: 50
 Total processing time: 11.678[seconds]
 Per frame: 0.234[seconds]
 ```
-![](img/PASTE_IMAGE_2022-08-20-23-17-59.png)
+![](https://raw.githubusercontent.com/yKesamaru/Using-Cython-for-Source-Code-Anonymization/master/img/PASTE_IMAGE_2022-08-20-23-17-59.png)
 
 ## C++
 ```bash
@@ -413,10 +413,10 @@ Number of frames processed: 50
 Total processing time: 11.879[seconds]
 Per frame: 0.238[seconds]
 ```
-![](img/PASTE_IMAGE_2022-08-20-23-19-35.png)
+![](https://raw.githubusercontent.com/yKesamaru/Using-Cython-for-Source-Code-Anonymization/master/img/PASTE_IMAGE_2022-08-20-23-19-35.png)
 
 ## 処理速度
-![](img/PASTE_IMAGE_2022-08-20-23-25-53.png)
+![](https://raw.githubusercontent.com/yKesamaru/Using-Cython-for-Source-Code-Anonymization/master/img/PASTE_IMAGE_2022-08-20-23-25-53.png)
 
 生のPythonコードの処理にかかった時間を1として、CythonとC++で書かれたコードの処理時間を計算しました。
 
