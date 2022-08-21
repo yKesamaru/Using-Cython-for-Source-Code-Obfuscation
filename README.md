@@ -1,8 +1,6 @@
-TODO #1:
+<!-- TODO #1:
 - 校正
-- GIFファイル化
-
-
+- GIFファイル化 -->
 # 一時的なコード秘匿にCythonを！
 ![](https://github.com/yKesamaru/FACE01_SAMPLE/raw/master/docs/img/ROMAN_HOLIDAY.GIF?raw=true)
 # 環境
